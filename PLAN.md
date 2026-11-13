@@ -90,7 +90,7 @@ This supersedes the earlier paid Render recommendation. No card, paid plan, bill
 - [x] Add opt-in one-hour employee demo sessions, a passwordless button and atomic shared sign-in admission.
 - [x] Verify real PostgreSQL sign-ins, 30/5 concurrent admission and the HTTPS browser demo locally.
 - [x] Preserve existing full-feature local flows and migrate the isolated test database.
-- [ ] Finish final code/security checks and publish the verified preparation changes to businessos-erp.
+- [x] Finish final code/security checks and publish the verified preparation changes to businessos-erp (`a407d56`).
 - [ ] Connect the owner's Vercel/Neon accounts, inspect actual plan eligibility and quotas, and stop if any payment/card requirement appears.
 - [ ] Create only the three approved new free projects; migrate/seed and deploy.
 - [ ] Verify the real public HTTPS certificate and all hosted acceptance flows; only then add the Live Demo URL.
