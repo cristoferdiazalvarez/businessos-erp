@@ -8,6 +8,8 @@ BusinessOS is a multi-tenant ERP demo for growing teams. It brings customer reco
 
 > **Portfolio/demo project.** The seeded organizations and people are fictional. Invoice PDFs and numbers are workflow examples only; they are not tax, accounting, or legal documents. PostgreSQL migrations, seeds, API integration checks and browser E2E flows have been verified locally, including compiled web/API servers. This is a demo, not a production deployment certification.
 
+**[Open the live demo](https://businessos-web-five.vercel.app)** · Select **Explore demo** for a one-hour, read-only employee session. No password or installation is needed.
+
 ## Product preview
 
 | Public landing | Sign in |
@@ -141,7 +143,7 @@ Verified on **2026-11-13**, macOS 27.0.1 arm64, Node 26.5.0, pnpm 10.12.1, Postg
 | Check | Result |
 | --- | --- |
 | Prisma client generation | Passed |
-| Two committed migrations, development and isolated test DB | Passed |
+| Three committed migrations, development/test and hosted Neon DB | Passed |
 | Main seed and second-tenant test seed | Passed |
 | Lint and TypeScript | Passed |
 | API Jest | 8 suites / 25 tests passed |
@@ -156,13 +158,17 @@ Verified on **2026-11-13**, macOS 27.0.1 arm64, Node 26.5.0, pnpm 10.12.1, Postg
 
 Real integration assertions cover malformed input, disallowed origins, concurrent stock reservation (one success/one conflict), calculated totals, cancellation and stock restoration, login/logout and revoked-token replay, admin/manager/employee permissions, customer/catalog writes, sales payment, PDF/CSV downloads and cross-organization reads/writes across customers, inventory, orders and invoice PDFs. The second scenario captures eleven views at desktop/mobile widths, checks page overflow and browser exceptions, and verifies cookie attributes.
 
-CI defines install, publication preflight, generation/migrations/seeds, lint, typecheck, unit tests, builds, compiled E2E, production API checks and Linux Docker image builds against PostgreSQL. **GitHub Actions passed on Linux**, including both the verification and container-build jobs: [validated run](https://github.com/cristoferdiazalvarez/businessos-erp/actions/runs/43404172988). No deployment or coverage percentage is claimed. See [validation record](./PROGRESS.md).
+CI defines install, publication preflight, generation/migrations/seeds, lint, typecheck, unit tests, builds, compiled E2E, production API checks and Linux Docker image builds against PostgreSQL. **GitHub Actions passed on Linux**, including both the verification and container-build jobs: [validated run](https://github.com/cristoferdiazalvarez/businessos-erp/actions/runs/43410868848). Hosted acceptance additionally passed on Chromium desktop/mobile against the real HTTPS deployment. No coverage percentage is claimed. See [validation record](./PROGRESS.md).
 
 ## Repository and deployment
 
 Repository: [cristoferdiazalvarez/businessos-erp](https://github.com/cristoferdiazalvarez/businessos-erp), default branch `main`. The live badge above reflects the actual GitHub workflow status. See [PROGRESS.md](./PROGRESS.md) for publication and validation evidence.
 
-The public demo is **prepared, not deployed**. The selected **EUR 0/month** route uses Vercel Hobby for Next.js and the real NestJS API, plus Neon Free PostgreSQL. The [deployment guide](./docs/deployment.md) covers account/plan checks, same-origin HTTPS sessions, direct migrations versus pooled runtime connections, and passwordless employee-only access. The three free projects have owner approval; provider connections and hosted verification remain pending. Local full-feature development remains available with `PUBLIC_DEMO_MODE=false`. No Live Demo link is claimed before public verification.
+The public demo is **live** at [businessos-web-five.vercel.app](https://businessos-web-five.vercel.app). The verified **EUR 0/month** setup runs Next.js and the real NestJS API on Vercel Hobby, with persistent PostgreSQL 17 on Neon Free. Public acceptance verified trusted HTTPS, employee login, dashboard, customers, catalog/inventory, sales, invoice PDFs, role/tenant restrictions and logout on desktop/mobile Chromium. The [deployment guide](./docs/deployment.md) records configuration and limits. Local full-feature development remains available with `PUBLIC_DEMO_MODE=false`.
+
+| Live desktop | Live mobile |
+| --- | --- |
+| ![Hosted BusinessOS desktop](./docs/screenshots/hosted-demo-desktop.png) | ![Hosted BusinessOS mobile](./docs/screenshots/hosted-demo-mobile.png) |
 
 Run `pnpm check:publication` before committing. It checks publication candidates against private/generated paths, common key signatures and local passwords. `.env`, database files, binaries, browser caches, outputs and traces remain ignored. This preflight is not a complete security audit.
 

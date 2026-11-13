@@ -4,7 +4,13 @@
 
 **Budget: EUR 0/month.** Use two **Vercel Hobby** projects (Next.js web and the existing NestJS API) with one **Neon Free** PostgreSQL project. Do not select Pro, Launch, Scale, usage-billed integrations, paid add-ons, custom-domain purchases or trials. Never enter a card to bypass a setup gate.
 
-The owner approved creation of these three free projects on 2026-11-13, conditional on successful checks and actual free-plan availability. Account connections and hosted validation are still pending. **No public demo URL is claimed yet.** GitHub publication is not an application deployment.
+The owner approved creation of these three free projects on 2026-11-13, conditional on successful checks and actual free-plan availability. Account plans were verified through authenticated CLI access: Vercel Hobby and Neon Free. The three approved resources are deployed. Public trusted-HTTPS acceptance passed on desktop/mobile Chromium.
+
+- **Web:** https://businessos-web-five.vercel.app — choose **Explore demo**.
+- **API readiness:** https://businessos-api-three.vercel.app/api/health
+- **Database:** new `businessos-demo` Neon Free project, PostgreSQL 17, AWS Frankfurt; credentials remain private.
+
+No card, paid integration, trial or paid plan was activated. Free quota exhaustion can still suspend availability.
 
 ```text
 Browser --HTTPS--> Next.js / *.vercel.app
@@ -39,7 +45,7 @@ See [hosting research](./free-hosting-research.md) for all six requested platfor
 
 Use the published repository `cristoferdiazalvarez/businessos-erp`, branch `main`, with workspace source files outside each project root available to the monorepo build. Both builds install the frozen pnpm lockfile with build dependencies enabled. The API build runs Prisma generation on every build to avoid stale cached clients. Prisma includes the Linux/OpenSSL engine needed by Vercel. A runtime trace preflight also checks native Argon2 and invoice font assets against the standard function size ceiling.
 
-Set the API/web in Frankfurt (`fra1`) and choose the corresponding Neon AWS Frankfurt region if available on Free. Never pay to obtain a preferred region. The API function maximum duration is 30 seconds; no background worker or long-lived in-process state is required by the application.
+Set the API/web in Frankfurt (`fra1`) and choose the corresponding Neon AWS Frankfurt region if available on Free. Never pay to obtain a preferred region. The API function maximum duration is 30 seconds, configured in the project’s `resourceConfig.functionDefaultTimeout`. The native NestJS builder rejected a manual `functions.src/main.ts` pattern; that pattern was removed from the manifest after the first deployment failed. Both production builds subsequently succeeded. No background worker or long-lived in-process state is required by the application.
 
 `.vercelignore`, `.gitignore` and publication checks exclude local environments, generated artifacts, browser traces and Vercel account linkage. Environment templates contain placeholders only. CLI/connection metadata and local test certificates belong in ignored `.local`/`.vercel` directories.
 
@@ -91,4 +97,14 @@ Set `PLAYWRIGHT_BROWSERS_PATH` consistently if using the project-local browser c
 
 Vercel and Neon cold starts, monthly quotas, account restrictions and terms can affect availability. Free services are not an SLA or permanent contractual promise. Neon compute suspends when idle while storage persists; exceeding free compute/transfer limits can suspend access until reset. The Free database is not a substitute for a verified backup/restore policy. No paid upgrade, anti-sleep traffic, trial renewal or automatic billing is authorized.
 
-Provider-native packaging, Neon TLS/pooling and public HTTPS remain unverified until the authorized resources exist. Local tests and Linux CI exercise real PostgreSQL and the application; they do not impersonate the Vercel/Neon control plane.
+Provider-native Node 22 packaging, Neon TLS/pooling and public HTTPS were verified against the deployed application. Both production projects have public access without Vercel owner authentication. Native Prisma, Argon2 and PDF font handling worked in the hosted NestJS function.
+
+Re-run the non-destructive public acceptance deliberately, rather than as a periodic keepalive:
+
+```sh
+node scripts/verify-hosted-demo.mjs https://businessos-web-five.vercel.app https://businessos-api-three.vercel.app
+```
+
+This uses normal trusted TLS (no certificate bypass), two isolated browser sessions and only fictional data. It checks desktop/mobile login, persisted modules and inventory, invoice PDFs, rejected tenant/admin/business-write access and logout. Screenshots are saved under docs/screenshots/hosted-demo-*.png. CI remains on its isolated PostgreSQL service; public traffic is not part of routine CI.
+
+Deployments were performed deliberately with the official Vercel CLI from this repository, using the per-project roots above. Git auto-deployment remains disabled; no additional marketplace/GitHub integration was activated. Future deployment operators must authenticate their CLI and select the existing BusinessOS project IDs before deploying, never create replacement resources by default.
