@@ -92,10 +92,21 @@ The owner explicitly authorized the public `cristoferdiazalvarez/businessos-erp`
 - Added a database-backed readiness endpoint, graceful shutdown hooks, production HTTPS-origin/cookie validation, configurable trusted proxy hops, same-origin Next.js API rewrites and an opt-in public read-only write guard. Local full-feature mode is unchanged by default.
 - Added `check:production`, which passed against the real isolated test database: health, authenticated employee reads, Secure/HttpOnly/SameSite cookie attributes, rejected public writes/recovery, rejected origin and revoked-session replay. Local HTTP inspection does not certify hosted HTTPS.
 - Latest local unit suite: API 8 suites / 23 tests; web 1 file / 2 tests, all passed. Lint, typecheck, both builds and compiled E2E passed. Production dependency audit: no known vulnerabilities.
-- Added multi-stage, non-root API/web Dockerfiles and a separate API operations target. API production dependency packaging, Prisma generation and Prisma/Argon2 imports passed locally. Docker itself is unavailable locally; Linux image builds are delegated to the actual CI container job and are not yet claimed as passed.
+- Added multi-stage, non-root API/web Dockerfiles and a separate API operations target. API production dependency packaging, Prisma generation and Prisma/Argon2 imports passed locally. Docker itself is unavailable locally; all three Linux image targets subsequently passed in the hosted CI container job. Live deployment remains unverified.
 - Added a Render Blueprint validated against the official JSON schema. It prepares public web, private API/database, pre-deploy migrations, generated credentials and manual deployment triggers. Nothing was provisioned.
 - Render baseline estimate: about USD 20/month before tax/extra usage, not a purchase or guaranteed quote. See docs/deployment.md.
 - Reviewed production dependency licenses. MIT is suggested for original BusinessOS code, subject to owner confirmation and the separate upstream obligations documented in docs/third-party-notices.md. No project license added.
 - Linux CI now includes publication preflight, masked ephemeral passwords, PostgreSQL migrations/seeds, lint/types/unit tests/build, compiled browser E2E, production checks and container build validation.
 
-Publication and hosted Actions: pending the final local gate and authorized push. No deployment performed.
+### Publication evidence
+
+- Public repository created: https://github.com/cristoferdiazalvarez/businessos-erp
+- Initial commit: `45e77fd543a621180cf255bbeece000743aed54d`, pushed normally to `main`; local branch tracks `origin/main`. No force push.
+- Description and all ten requested topics configured. Private vulnerability reporting enabled.
+- Unauthenticated HTTP verification passed for the repository page, raw README and all 22 PNG screenshots. GitHub-rendered README HTML contains the title and five image elements, including the real CI badge.
+- Git history/object scan found no local password values or recognized private-key/token signatures. No developer environments, database files, generated outputs or traces were committed.
+- Linux verification job passed: install, publication preflight, PostgreSQL migration/seed, lint, typecheck, 25 unit tests, builds, same-origin proxy E2E and production API checks.
+- Actions run: https://github.com/cristoferdiazalvarez/businessos-erp/actions/runs/43404172988 — **SUCCESS**. Both `verify` and `containers` passed. Linux built the API runtime, API operations and standalone web images. No workflow failure required a code fix. The runner emitted non-blocking action-runtime/image-transition notices.
+- No hosted application or paid resource created. License choice and hosting approval remain separate owner decisions.
+
+Final documentation synchronization records the successful run above. The documentation-only commit uses `[skip ci]` to avoid rebuilding unchanged application code/images; the validated application/workflow commit is `45e77fd543a621180cf255bbeece000743aed54d`. No environment files, secret values, generated outputs or private traces were added.

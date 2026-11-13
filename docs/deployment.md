@@ -55,7 +55,7 @@ The API runtime contains deployed production dependencies and a generated Prisma
 
 API runtime variables are documented in [api.env.example](../deploy/api.env.example); web variables are in [web.env.example](../deploy/web.env.example). Keep the API/database on an internal network; terminate HTTPS at a trusted proxy or managed provider. Do not publish PostgreSQL ports. Health checks are built into both images.
 
-Docker is unavailable on the local macOS machine. Local API runtime packaging/imports were checked; the Linux CI container job is responsible for building both runtime images and the operations image. Container build status must be taken from the actual Actions run, not inferred from local Node builds.
+Docker is unavailable on the local macOS machine. Local API runtime packaging/imports were checked. The [Linux Actions run](https://github.com/cristoferdiazalvarez/businessos-erp/actions/runs/43404172988) successfully built the API runtime, API operations and standalone web images. This verifies image construction; hosted startup, TLS and a deployed container smoke test remain separate checks.
 
 ## Local checks
 

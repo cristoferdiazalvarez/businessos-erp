@@ -149,13 +149,14 @@ Verified on **2026-11-13**, macOS 27.0.1 arm64, Node 26.5.0, pnpm 10.12.1, Postg
 | API and Next.js production builds | Passed |
 | Playwright, development servers | 2 scenarios passed |
 | Playwright, compiled servers | 2 scenarios passed |
+| Linux GitHub Actions, including all three Docker image targets | Passed |
 | Production dependency audit | No known vulnerabilities found |
 | Production API configuration and read-only demo checks | Passed |
 | Publication candidate scan | Passed; no generated/private files or local passwords detected |
 
 Real integration assertions cover malformed input, disallowed origins, concurrent stock reservation (one success/one conflict), calculated totals, cancellation and stock restoration, login/logout and revoked-token replay, admin/manager/employee permissions, customer/catalog writes, sales payment, PDF/CSV downloads and cross-organization reads/writes across customers, inventory, orders and invoice PDFs. The second scenario captures eleven views at desktop/mobile widths, checks page overflow and browser exceptions, and verifies cookie attributes.
 
-CI defines install, publication preflight, generation/migrations/seeds, lint, typecheck, unit tests, builds, compiled E2E, production API checks and Linux Docker image builds against PostgreSQL. **GitHub Actions itself has not been executed**, since this repository has not been pushed. No deployment or coverage percentage is claimed. See [validation record](./PROGRESS.md).
+CI defines install, publication preflight, generation/migrations/seeds, lint, typecheck, unit tests, builds, compiled E2E, production API checks and Linux Docker image builds against PostgreSQL. **GitHub Actions passed on Linux**, including both the verification and container-build jobs: [validated run](https://github.com/cristoferdiazalvarez/businessos-erp/actions/runs/43404172988). No deployment or coverage percentage is claimed. See [validation record](./PROGRESS.md).
 
 ## Repository and deployment
 

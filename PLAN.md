@@ -40,9 +40,9 @@ Build a deployable, portfolio-ready multi-tenant ERP SaaS with a Next.js web app
 
 ## Verification gate
 
-Local acceptance passed on 2026-11-13: PostgreSQL 17.12 migration/seed, API integration assertions and Playwright browser workflows with development and compiled servers. Lint, TypeScript, 19 unit tests and both builds passed. Eleven views have current desktop/mobile captures. Production dependency audit reports no known vulnerabilities.
+Local acceptance passed on 2026-11-13: PostgreSQL 17.12 migration/seed, API integration assertions and Playwright browser workflows with development and compiled servers. Lint, TypeScript, 25 unit tests and both builds passed. Eleven views have current desktop/mobile captures. Production dependency audit reports no known vulnerabilities.
 
-This is ready for owner review as a GitHub portfolio/demo repository, not a deployed production service. Docker startup, remote GitHub Actions, HTTPS production cookies, additional browser engines and physical devices remain unverified. No project license has been selected.
+This is ready for owner review as a GitHub portfolio/demo repository, not a deployed production service. Remote GitHub Actions and Linux Docker image builds passed. Hosted container startup, HTTPS termination, additional browser engines and physical devices remain unverified. No project license has been selected.
 
 ## PostgreSQL and publication follow-through
 
@@ -56,7 +56,7 @@ This is ready for owner review as a GitHub portfolio/demo repository, not a depl
 - [x] Update English README, setup guide, security/contribution notes, `.gitignore` and secret-free environment template.
 - [x] Initialize local Git `main`; inspect publication candidates without staging, commits or remote.
 - [ ] Run Docker Compose on a Docker-capable machine (alternative only; native PostgreSQL path already verified).
-- [ ] Execute hosted CI after the owner authorizes publication.
+- [x] Execute hosted CI: verification and container-build jobs passed on Linux.
 - [x] Owner explicitly authorizes BusinessOS repository creation, commits and pushes after successful security checks.
 - [ ] Owner chooses a project license (MIT suggested; third-party obligations documented).
 
@@ -75,6 +75,6 @@ This is ready for owner review as a GitHub portfolio/demo repository, not a depl
 - [x] Prepare Render Blueprint and non-root API/web Dockerfiles; no resources purchased.
 - [x] Validate Blueprint with the official JSON schema and inspect dependency license metadata.
 - [x] Extend Linux CI with production verification and container builds.
-- [ ] Create repository, push main and verify public README/screenshots.
-- [ ] Observe hosted CI and resolve failures.
-- [ ] Record publication and final Actions evidence in PROGRESS.md.
+- [x] Create repository, push main and verify public README/screenshots.
+- [x] Observe hosted CI: both jobs passed, including all container builds.
+- [x] Record publication and final Actions evidence in PROGRESS.md.
