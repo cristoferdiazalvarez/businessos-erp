@@ -1,4 +1,5 @@
-# Applying this Blueprint creates paid resources. Owner approval is required.
+# LEGACY PAID ALTERNATIVE: NOT AUTHORIZED under the current EUR 0 budget.
+# Do not apply this Blueprint. Use docs/deployment.md for Vercel Hobby + Neon Free.
 services:
   - type: pserv
     name: businessos-api

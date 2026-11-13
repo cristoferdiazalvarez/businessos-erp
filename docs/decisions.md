@@ -35,3 +35,13 @@ NestJS throttling provides baseline API and auth rate limits. Its in-memory stat
 ## ADR 009 — Server-derived decimal totals and transactional stock
 
 Order unit prices, discounts, tax, and totals are calculated on the server from current persisted records using decimal values. Order, invoice, stock, inventory-movement, and audit writes are grouped in database transactions. Browser-provided totals are not accepted as authoritative.
+
+## ADR 006 — Zero-cost personal portfolio hosting
+
+The owner requires EUR 0/month without cards, paid subscriptions, automatic overages or trial-to-paid conversion. Use two Vercel Hobby projects with native Next.js/NestJS runtimes and one Neon Free PostgreSQL project, subject to real account eligibility. This preserves the existing stack instead of substituting an edge/D1 backend. The earlier paid Render Blueprint is retained only as an explicitly non-authorized reference under deploy/.
+
+The web proxies same-origin API requests over HTTPS. Neon credentials stay server-side and use TLS over the public network; private VPC isolation is not included in Free. Runtime uses transaction pooling with bounded connection count, while migrations use the direct URL.
+
+An opt-in passwordless demo endpoint creates only a one-hour employee session for the fictional seeded tenant. A PostgreSQL atomic counter makes sign-in admission consistent across serverless instances; normal local authentication and writes remain unchanged when demo mode is off. No visitor IP storage or paid shared limiter is introduced.
+
+Cold starts, quota suspension, provider terms and lack of an SLA are accepted limits, not simulated availability. No resources are created before owner approval, no paid fallback is automatic, and a Live Demo URL is added only after actual internet/certificate and functional verification.

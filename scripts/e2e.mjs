@@ -12,6 +12,7 @@ if (!parsed.pathname.endsWith('_test') || parsed.pathname === new URL(process.en
   throw new Error('E2E requires a separate database with a name ending in _test. Development data must remain isolated.');
 }
 process.env.DATABASE_URL = testUrl;
+process.env.DIRECT_DATABASE_URL = testUrl;
 process.env.NODE_ENV = 'test';
 const commands = process.argv[2] === 'prepare'
   ? [['db:migrate'], ['db:seed'], ['--filter', '@businessos/api', 'exec', 'tsx', 'prisma/e2e-seed.ts']]

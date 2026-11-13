@@ -144,7 +144,7 @@ Verified on **2026-11-13**, macOS 27.0.1 arm64, Node 26.5.0, pnpm 10.12.1, Postg
 | Two committed migrations, development and isolated test DB | Passed |
 | Main seed and second-tenant test seed | Passed |
 | Lint and TypeScript | Passed |
-| API Jest | 8 suites / 23 tests passed |
+| API Jest | 8 suites / 25 tests passed |
 | Web Vitest | 1 file / 2 tests passed |
 | API and Next.js production builds | Passed |
 | Playwright, development servers | 2 scenarios passed |
@@ -162,21 +162,27 @@ CI defines install, publication preflight, generation/migrations/seeds, lint, ty
 
 Repository: [cristoferdiazalvarez/businessos-erp](https://github.com/cristoferdiazalvarez/businessos-erp), default branch `main`. The live badge above reflects the actual GitHub workflow status. See [PROGRESS.md](./PROGRESS.md) for publication and validation evidence.
 
-The public demo is **prepared, not deployed**. [Deployment guide](./docs/deployment.md) covers the Render Blueprint, HTTPS with a same-origin private API proxy, managed PostgreSQL, migrations, health checks, non-root Docker images and a read-only visitor mode. No paid resources have been created. Local full-feature development remains available with `PUBLIC_DEMO_MODE=false`.
+The public demo is **prepared, not deployed**. The selected **EUR 0/month** route uses Vercel Hobby for Next.js and the real NestJS API, plus Neon Free PostgreSQL. The [deployment guide](./docs/deployment.md) covers account/plan checks, same-origin HTTPS sessions, direct migrations versus pooled runtime connections, and passwordless employee-only access. The three free projects have owner approval; provider connections and hosted verification remain pending. Local full-feature development remains available with `PUBLIC_DEMO_MODE=false`. No Live Demo link is claimed before public verification.
 
 Run `pnpm check:publication` before committing. It checks publication candidates against private/generated paths, common key signatures and local passwords. `.env`, database files, binaries, browser caches, outputs and traces remain ignored. This preflight is not a complete security audit.
 
 No project license has been selected. MIT is suggested for the original source, subject to owner confirmation and [third-party notices](./docs/third-party-notices.md). See [contributing](./CONTRIBUTING.md) and [security](./SECURITY.md).
+
+## Free hosting limits
+
+Vercel Hobby is intended for a personal/non-commercial portfolio. Neon compute sleeps when idle; Vercel functions can cold-start. Free compute, request, transfer and storage quotas can suspend availability. Data remains in real PostgreSQL; the application does not switch to a mock or temporary browser database. No paid upgrade, billing integration, card or trial-to-paid plan is authorized.
+
+The API uses Neon's authenticated TLS endpoint over the public network; private VPC networking is not part of this free plan. Database credentials stay in the API/operator environment. See [current provider limits and sources](./docs/free-hosting-research.md). No free-plan SLA or universal browser/deployment validation is claimed.
 
 ## Security and production notes
 
 - Passwords use Argon2id; only a hash of the random session token is stored. Session cookies are HTTP-only, SameSite=Lax, and Secure in production.
 - Role checks and organization scoping run in the API. Resource lookups include the server-derived organization ID to prevent cross-tenant IDOR.
 - Login/password-recovery endpoints are throttled; request bodies use Zod validation; Helmet headers and origin checks are enabled.
-- Rate limiting currently uses NestJS in-memory storage. A multi-instance deployment requires a shared store.
+- General request throttling uses NestJS in-memory storage. Public demo/password sign-ins additionally use an atomic PostgreSQL limit shared across instances; read abuse can still exhaust free quotas.
 - Password recovery and employee invitations are demo flows; there is no configured email delivery provider.
-- Set production secrets through the hosting provider, use HTTPS and exact origins, and verify trusted proxy configuration. A Render deployment blueprint and Docker images are prepared; hosted operation is not yet verified.
-- `PUBLIC_DEMO_MODE=true` rejects business mutations, password recovery and invitations; visitor access should use the fictional employee account. Never share admin/manager passwords.
+- Set production secrets through the hosting provider, use HTTPS and exact origins, and verify trusted proxy configuration. Vercel manifests and Docker images are prepared; hosted operation is not yet verified.
+- `PUBLIC_DEMO_MODE=true` rejects business mutations, password recovery and invitations. With `NEXT_PUBLIC_DEMO_MODE=true`, the Explore demo button creates a real one-hour employee session without displaying a password. Never share admin/manager credentials.
 - Invoice PDFs are fictional workflow records and do not claim legal or tax compliance.
 
 ## Project status and limitations

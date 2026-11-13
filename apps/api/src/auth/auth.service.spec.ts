@@ -1,4 +1,4 @@
-import { UnauthorizedException } from "@nestjs/common";
+import { ForbiddenException, ServiceUnavailableException, UnauthorizedException } from "@nestjs/common";
 import { createHash } from "node:crypto";
 import * as argon2 from "argon2";
 import { AuthService } from "./auth.service";
@@ -25,6 +25,8 @@ describe("AuthService", () => {
   const prisma = {
     user: { findUnique: jest.fn() },
     session: { create: jest.fn() },
+    membership: { findFirst: jest.fn() },
+    $queryRaw: jest.fn(),
   };
   const service = new AuthService(prisma as unknown as PrismaService);
 
@@ -68,5 +70,35 @@ describe("AuthService", () => {
     await expect(service.login("manager@example.test", "password")).rejects.toBeInstanceOf(
       UnauthorizedException,
     );
+  });
+
+  it("does not enable passwordless access in normal local mode", async () => {
+    const previous = process.env.PUBLIC_DEMO_MODE;
+    process.env.PUBLIC_DEMO_MODE = "false";
+    try {
+      await expect(service.createDemoSession()).rejects.toBeInstanceOf(ForbiddenException);
+      expect(prisma.session.create).not.toHaveBeenCalled();
+    } finally {
+      if (previous === undefined) delete process.env.PUBLIC_DEMO_MODE;
+      else process.env.PUBLIC_DEMO_MODE = previous;
+    }
+  });
+
+  it("requires a seeded employee in the fictional demo organization", async () => {
+    const previous = process.env.PUBLIC_DEMO_MODE;
+    process.env.PUBLIC_DEMO_MODE = "true";
+    prisma.$queryRaw.mockResolvedValue([{ count: 1 }]);
+    Object.assign(prisma.session, { deleteMany: jest.fn().mockResolvedValue({ count: 0 }) });
+    prisma.membership.findFirst.mockResolvedValue(null);
+    try {
+      await expect(service.createDemoSession()).rejects.toBeInstanceOf(ServiceUnavailableException);
+      expect(prisma.membership.findFirst).toHaveBeenCalledWith(expect.objectContaining({
+        where: expect.objectContaining({ role: "EMPLOYEE", organization: { slug: "northstar-studio" } }),
+      }));
+      expect(prisma.session.create).not.toHaveBeenCalled();
+    } finally {
+      if (previous === undefined) delete process.env.PUBLIC_DEMO_MODE;
+      else process.env.PUBLIC_DEMO_MODE = previous;
+    }
   });
 });

@@ -9,6 +9,7 @@ The running API provides Swagger UI at `/docs` and OpenAPI JSON at `/openapi.jso
 | Method | Path | Access | Behavior |
 | --- | --- | --- | --- |
 | `GET` | `/health` | Public | Database-backed readiness: 200 or generic 503; no connection details. |
+| `POST` | `/auth/demo` | Public, opt-in/read-only only | Creates a one-hour session for the seeded employee in Northstar Studio; no password or user/tenant selector; PostgreSQL-backed sign-in cap. |
 | `POST` | `/auth/login` | Public, throttled | Accepts email/password; sets the session cookie and returns the user, organization, and role summary. |
 | `POST` | `/auth/logout` | Public/idempotent | Revokes the stored session when present and clears the cookie. |
 | `GET` | `/auth/me` | Session required | Returns the user, organization, and current membership role. |

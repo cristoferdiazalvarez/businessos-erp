@@ -1,0 +1,11 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nestjs",
+  "installCommand": "corepack pnpm install --frozen-lockfile --prod=false",
+  "buildCommand": "corepack pnpm build",
+  "regions": ["fra1"],
+  "functions": {
+    "src/main.ts": { "maxDuration": 30 }
+  },
+  "git": { "deploymentEnabled": false }
+}

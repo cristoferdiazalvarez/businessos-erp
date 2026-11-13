@@ -78,3 +78,19 @@ This is ready for owner review as a GitHub portfolio/demo repository, not a depl
 - [x] Create repository, push main and verify public README/screenshots.
 - [x] Observe hosted CI: both jobs passed, including all container builds.
 - [x] Record publication and final Actions evidence in PROGRESS.md.
+
+## Active deployment goal — EUR 0/month
+
+This supersedes the earlier paid Render recommendation. No card, paid plan, billed integration, auto-overage or trial-to-paid enrollment is permitted.
+
+- [x] Research Render, Vercel, Supabase, Neon, Cloudflare and Railway with primary sources.
+- [x] Select two native Vercel Hobby projects plus one Neon Free PostgreSQL project; document public-network TLS and free-plan limitations.
+- [x] Obtain owner approval for exactly those three free projects, conditional on successful checks and actual Free/Hobby eligibility.
+- [x] Prepare provider manifests, bounded connection/pool settings, direct migration URL, one-time fictional seed and secret exclusions.
+- [x] Add opt-in one-hour employee demo sessions, a passwordless button and atomic shared sign-in admission.
+- [x] Verify real PostgreSQL sign-ins, 30/5 concurrent admission and the HTTPS browser demo locally.
+- [x] Preserve existing full-feature local flows and migrate the isolated test database.
+- [ ] Finish final code/security checks and publish the verified preparation changes to businessos-erp.
+- [ ] Connect the owner's Vercel/Neon accounts, inspect actual plan eligibility and quotas, and stop if any payment/card requirement appears.
+- [ ] Create only the three approved new free projects; migrate/seed and deploy.
+- [ ] Verify the real public HTTPS certificate and all hosted acceptance flows; only then add the Live Demo URL.

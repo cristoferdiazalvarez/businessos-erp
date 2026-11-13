@@ -2,7 +2,10 @@ import { resolve } from "node:path";
 import { config as loadDotenv } from "dotenv";
 import { defineConfig } from "prisma/config";
 
-loadDotenv({ path: resolve(process.cwd(), "../../.env") });
+if (process.env.BUSINESSOS_IGNORE_LOCAL_ENV !== "true") {
+  loadDotenv({ path: resolve(process.cwd(), "../../.env") });
+}
+const migrationUrl = process.env.DIRECT_DATABASE_URL || process.env.DATABASE_URL;
 
 export default defineConfig({
   schema: "prisma/schema.prisma",
@@ -10,7 +13,7 @@ export default defineConfig({
     path: "prisma/migrations",
     seed: "tsx prisma/seed.ts",
   },
-  ...(process.env.DATABASE_URL
-    ? { datasource: { url: process.env.DATABASE_URL } }
+  ...(migrationUrl
+    ? { datasource: { url: migrationUrl } }
     : {}),
 });

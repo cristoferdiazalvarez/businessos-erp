@@ -43,6 +43,16 @@ function cookieOptions() {
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Post("demo")
+  @HttpCode(200)
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @ApiOperation({ summary: "Create a one-hour employee-only session for the opt-in read-only public demo" })
+  async demo(@Res({ passthrough: true }) response: Response) {
+    const result = await this.authService.createDemoSession();
+    response.cookie(SESSION_COOKIE, result.token, { ...cookieOptions(), maxAge: 60 * 60 * 1000 });
+    return { user: result.user };
+  }
+
   @Post("login")
   @HttpCode(200)
   @Throttle({ default: { limit: 5, ttl: 60_000 } })

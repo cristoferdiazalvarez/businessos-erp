@@ -20,7 +20,7 @@ export function validateDeploymentEnvironment(env: NodeJS.ProcessEnv): void {
 export function publicDemoWriteGuard(request: Request, response: Response, next: NextFunction): void {
   const readOnly = process.env.PUBLIC_DEMO_MODE === "true";
   const read = ["GET", "HEAD", "OPTIONS"].includes(request.method);
-  const session = request.method === "POST" && ["/api/auth/login", "/api/auth/logout"].includes(request.path);
+  const session = request.method === "POST" && ["/api/auth/login", "/api/auth/logout", "/api/auth/demo"].includes(request.path);
   if (readOnly && !read && !session) {
     response.status(403).json({ statusCode: 403, message: "This public demo is read-only" });
     return;

@@ -16,6 +16,20 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [pending, setPending] = useState(false);
   const [formError, setFormError] = useState("");
+  const publicDemo = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
+
+  async function exploreDemo() {
+    setPending(true);
+    setFormError("");
+    try {
+      await api("/auth/demo", { method: "POST" });
+      router.replace("/app");
+    } catch (error) {
+      setFormError(error instanceof ApiError ? error.message : "Demo access is temporarily unavailable.");
+    } finally {
+      setPending(false);
+    }
+  }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -67,6 +81,7 @@ export default function LoginPage() {
             <p className="mt-2 text-sm text-muted-foreground">Sign in to your BusinessOS workspace.</p>
           </div>
           <form onSubmit={submit} className="space-y-5" noValidate>
+            {publicDemo && <div className="space-y-3 rounded-xl border border-border bg-muted/60 p-4"><p className="text-sm text-muted-foreground">Explore the workspace with fictional data and read-only access. No password needed.</p><Button type="button" className="w-full" disabled={pending} onClick={exploreDemo}>Explore demo <ArrowRight size={16} /></Button></div>}
             <label className="block text-sm font-medium" htmlFor="email">Work email
               <input id="email" name="email" type="email" autoComplete="username" required maxLength={254} className="mt-2 h-11 w-full rounded-xl border border-border bg-card px-3.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/20" placeholder="you@company.com" />
             </label>
@@ -83,7 +98,7 @@ export default function LoginPage() {
           <div className="mt-8 rounded-xl border border-border bg-muted/60 p-4 text-xs leading-5 text-muted-foreground">
             <p className="font-semibold text-foreground">Demo accounts</p>
             <p className="mt-1">admin@businessos.demo · manager@businessos.demo · employee@businessos.demo</p>
-            <p className="mt-1">Set your own passwords in `.env` before running the demo seed. No shared credentials are provided.</p>
+            <p className="mt-1">{publicDemo ? "Demo sessions expire after one hour. Administrative actions and changes to data are disabled." : "Set your own passwords in `.env` before running the demo seed. No shared credentials are provided."}</p>
           </div>
         </div>
         <p className="pb-2 text-center text-xs text-muted-foreground">By signing in, you agree to keep your workspace secure.</p>

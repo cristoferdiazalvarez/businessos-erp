@@ -1,73 +1,94 @@
-# Public demo deployment
+# Zero-cost public demo deployment
 
-## Recommended platform and budget
+## Selected architecture and current status
 
-Use **Render** for a small demo: one public Next.js service, a private NestJS service and managed PostgreSQL in the same region. This minimizes server administration while preserving the existing application boundaries. Estimated baseline is **about USD 20/month**: two USD 7 services and a USD 6 database, before tax, extra storage, traffic or build usage. This is an estimate from [Render pricing](https://render.com/pricing) and its [small-application cost example](https://render.com/articles/how-much-does-cloud-application-hosting-cost-for-small-businesses), checked on 2026-11-13; confirm the actual quote before approval. The small instance sizes have not been load-tested.
+**Budget: EUR 0/month.** Use two **Vercel Hobby** projects (Next.js web and the existing NestJS API) with one **Neon Free** PostgreSQL project. Do not select Pro, Launch, Scale, usage-billed integrations, paid add-ons, custom-domain purchases or trials. Never enter a card to bypass a setup gate.
 
-A small VPS can cost less, but requires OS updates, TLS proxy operation and database backup/restore management. Free database tiers and sleeping web instances are not the reliability baseline for this demo. No hosting account, resource, subscription or paid deployment has been created.
-
-## Prepared topology
+The owner approved creation of these three free projects on 2026-11-13, conditional on successful checks and actual free-plan availability. Account connections and hosted validation are still pending. **No public demo URL is claimed yet.** GitHub publication is not an application deployment.
 
 ```text
-Browser --HTTPS--> Render web / Next.js
+Browser --HTTPS--> Next.js / *.vercel.app
                        |
-                       +-- /api/* rewrite --> private NestJS :4000
-                                                  |
-                                                  +--> private PostgreSQL 17
+                       +-- same-origin /api/* rewrite --HTTPS--> NestJS / *.vercel.app
+                                                                    |
+                                                                    +-- authenticated TLS --> Neon PostgreSQL
 ```
 
-The browser always uses `/api` on the web origin. Next.js proxies to the private API using [external rewrites](https://nextjs.org/docs/app/api-reference/config/next-config-js/rewrites). This avoids third-party cookie dependencies between unrelated hosting domains. Render terminates HTTPS; cookies are host-only, HTTP-only, Secure and SameSite=Lax. The API permits browser mutations only from the configured exact origin. The private API is not directly exposed publicly.
+This preserves Next.js, NestJS, Prisma, PostgreSQL and database sessions. [Vercel supports native NestJS entrypoints](https://vercel.com/docs/frameworks/backend/nestjs), including the existing `src/main.ts`. No mock API, SQLite replacement or browser-only simulation is used. [Neon Free](https://neon.com/pricing) provides persistent PostgreSQL with scale-to-zero; the database is not bundled inside a function.
 
-`WEB_ORIGIN` must be the exact final HTTPS web origin without a trailing slash or path. `API_ORIGIN` defaults to that same origin in production. The API refuses production startup with missing database/origin values, insecure origins, disabled secure cookies or invalid proxy-hop configuration. `PORT` supports hosting-provider injection. `TRUST_PROXY_HOPS=1` is intended for the private Next.js hop: verify the actual forwarded header chain before opening traffic; do not use an unrestricted trust-proxy setting or expose this API directly.
+**Network distinction:** Neon Free uses a password-authenticated TLS endpoint over the public network, not a private VPC. Database credentials live only in the API/operator environment. No database URL is sent to the browser or web project. Private networking is not included in the zero-cost design. The earlier fully private Render design has been retired as the default because it costs money; its non-authorized reference is [render.paid.reference.yaml](../deploy/render.paid.reference.yaml).
 
-`GET /api/health` performs a real database query and returns 200 or a generic 503. The web health check goes through the proxy so it also checks API/database reachability. SIGTERM/SIGINT shutdown hooks disconnect Prisma cleanly.
+See [hosting research](./free-hosting-research.md) for all six requested platforms, sources, limits and remaining eligibility checks.
 
-## Blueprint and rollout
+## Cost and authorization safeguards
 
-[`render.yaml`](../render.yaml) is a prepared Blueprint, validated against Render's official JSON schema. **Applying it provisions paid resources and requires separate owner approval.** Automatic deploys are disabled. It uses the native Node 22 runtime; the Dockerfiles are an alternative packaging route, not a simultaneous deployment requirement.
+- Use a personal, non-commercial portfolio on Hobby; do not deploy a real paying ERP business on that plan. Verify the account is actually Hobby before creating projects.
+- Verify Neon is actually Free before creating its project. Create it directly in Neon, not through an automatically billed Marketplace integration.
+- Stop if a provider asks for payment, a card, a paid organization, an upgrade or a trial. User approval of three free projects does not authorize any of those actions.
+- Resource creation is limited to the two new BusinessOS Vercel projects and one new Neon project. Do not change account billing, existing services, databases or deployments.
+- Free quota exhaustion must reduce availability or suspend the demo; do not upgrade automatically. No uptime-ping jobs or synthetic traffic to defeat provider sleeping rules.
+- Git deployment triggers are disabled in both manifests; deployments are deliberate after CI. Preview databases/projects are not created automatically.
 
-After hosting/cost approval:
+## Repository configuration
 
-1. Connect the published GitHub repository to Render and review the Blueprint's resource quote. Keep all services in Frankfurt and keep the database's external IP allowlist empty.
-2. Set the API's `WEB_ORIGIN` to the actual web URL. Render supplies the private database connection and API host/port references. It generates fresh demo passwords; never upload the developer `.env`.
-3. Deploy the API. The pre-deploy command runs `prisma migrate deploy`; a migration failure must block rollout. Deploy the web after its private API reference is available. Proxy targets and browser API settings are build-time configuration, so rebuild the web when changing them.
-4. From the API's private operator shell, run `corepack pnpm db:seed` **once** to populate fictional data. Do not seed on every deploy: the demo seed intentionally restores some demo values and passwords. Do not run it against customer data.
-5. Keep `PUBLIC_DEMO_MODE=true`. Share only the disposable **employee** demo account through the chosen demo-access channel after authorization. Keep admin/manager passwords private. No visitor signup is configured.
-6. Confirm the public HTTPS URL, proxied health check, login/logout, Secure cookies, employee read access, blocked writes/reset/invitations, tenant isolation and downloads. Check provider logs, actual client-IP forwarding, memory and database connections. Remote TLS/browser behavior has not been verified locally.
-7. Confirm provider backup retention and perform a restore exercise before claiming recoverability. Use backward-compatible migrations and retain a previous application version for rollback. Reverting an image does not roll back the database schema.
+| New project | Root directory | Runtime | Configuration |
+| --- | --- | --- | --- |
+| BusinessOS web | `apps/web` | Next.js / Node 22 | [vercel.json](../apps/web/vercel.json), [web environment template](../deploy/vercel-web-free.env.example) |
+| BusinessOS API | `apps/api` | NestJS / Node 22 | [vercel.json](../apps/api/vercel.json), [API environment template](../deploy/vercel-api-free.env.example) |
+| BusinessOS database | New Neon Free project | PostgreSQL 17 | [operator environment template](../deploy/neon-free.env.example) |
 
-The public demo guard permits business reads and session login/logout but rejects other writes, including password recovery, invitations, organization changes and profile/theme persistence. It is off by default locally. The employee role also independently restricts sensitive modules. Production mail delivery remains unconfigured. A single API instance is intentional because throttling is in memory; configure a shared limiter before scaling to multiple instances.
+Use the published repository `cristoferdiazalvarez/businessos-erp`, branch `main`, with workspace source files outside each project root available to the monorepo build. Both builds install the frozen pnpm lockfile with build dependencies enabled. The API build runs Prisma generation on every build to avoid stale cached clients. Prisma includes the Linux/OpenSSL engine needed by Vercel. A runtime trace preflight also checks native Argon2 and invoice font assets against the standard function size ceiling.
 
-## Container packaging
+Set the API/web in Frankfurt (`fra1`) and choose the corresponding Neon AWS Frankfurt region if available on Free. Never pay to obtain a preferred region. The API function maximum duration is 30 seconds; no background worker or long-lived in-process state is required by the application.
 
-Both Dockerfiles use the repository root as build context, a frozen pnpm lockfile and a non-root runtime user. `.dockerignore` excludes local environments, database files, Git state, browser caches, test traces and build outputs. No secret build arguments are declared.
+`.vercelignore`, `.gitignore` and publication checks exclude local environments, generated artifacts, browser traces and Vercel account linkage. Environment templates contain placeholders only. CLI/connection metadata and local test certificates belong in ignored `.local`/`.vercel` directories.
+
+## Database preparation and migration strategy
+
+1. After account/plan verification, create only the approved new Neon Free project. Store its direct and pooled URLs privately, never in GitHub files, logs or chat. Do not import any real customer database.
+2. Run `pnpm demo:prepare:free` once from a private operator environment with `DIRECT_DATABASE_URL`. It validates that the target is a direct Neon TLS URL, executes committed `prisma migrate deploy`, then seeds fictional organizations/users/catalog/sales. It never creates a cloud resource or subscription itself.
+3. The setup script generates private random passwords in the child environment and never prints them. Visitors do not need those passwords. Re-running the seed deliberately resets some fixture values; do not execute it on every request, cold start or deployment.
+4. Runtime API uses the **pooled** `DATABASE_URL` with `connection_limit=1`, TLS certificate validation and bounded connection/pool timeouts. Prisma CLI uses `DIRECT_DATABASE_URL` when present. This separates migrations from transaction pooling. See [Neon pooling](https://neon.com/docs/connect/connection-pooling).
+5. Keep direct/migration URLs out of the web project. Future migrations run as an explicit operator step before a compatible API rollout, never from an anonymous route. Migrations are additive; there is no automatic destructive reset.
+
+`pnpm demo:prepare:free --local-test` validates the same migration/seed sequence against the isolated local `_test` database. The E2E runner forces both pooled/direct variables to its test URL so a saved production direct URL cannot redirect tests into the public database.
+
+## HTTPS, authentication and visitor access
+
+- Web browser API URL is `/api`; the Next.js rewrite targets the actual API HTTPS URL. Cookies are therefore first-party on the web hostname, including browsers that block third-party cookies.
+- API `WEB_ORIGIN` and `API_ORIGIN` are the exact final web HTTPS origin. Production startup rejects insecure origins and disabled Secure cookies. Set only one trusted proxy hop and verify provider forwarding behavior before opening the demo.
+- `PUBLIC_DEMO_MODE=true` makes business operations read-only on the API. `NEXT_PUBLIC_DEMO_MODE=true` exposes the **Explore demo** button.
+- The button calls `POST /api/auth/demo`. The API looks up only the seeded `EMPLOYEE` membership in `northstar-studio`; it cannot choose an arbitrary user/organization or issue an admin session. The real opaque session expires in one hour; only its digest is stored.
+- No shared password is displayed or committed. Admin/manager passwords remain private and public invitations, reset, role changes, settings writes and business mutations are blocked.
+- An atomic PostgreSQL counter caps demo/password sign-ins at 30 per minute across instances; expired sessions are removed on accepted sign-in. No visitor IP is persisted. In-memory throttling is an additional local layer, not the authoritative distributed limit.
+- These controls reduce abuse; they do not provide an uptime guarantee against someone exhausting free request/compute quotas. Only fictional demo records are exposed to employee read access.
+
+## Health and hosted acceptance
+
+`GET /api/health` returns a database-backed 200 or generic 503 without connection details. Test it through the final web proxy and directly on the API. Do not run constant public health probes: unnecessary queries can keep Neon compute awake and consume the free allowance.
+
+After deployment, verify the real URLs from the internet without provider-owner authentication: trusted HTTPS certificate/chain, public landing/login, passwordless employee session, actual customer/product/inventory/order/invoice reads and PDF downloads, denied administrative writes, tenant isolation and logout/token revocation. Ensure Vercel authentication is not blocking the production API proxy or recruiters. Production preview protection and routing must be inspected on the actual new projects.
+
+Only after those checks pass should README contain a real Live Demo link. Local TLS tests use a temporary self-signed localhost certificate and cannot certify a provider URL or a trusted public certificate.
+
+## Validation and limitations
 
 ```sh
-docker build -f apps/api/Dockerfile --target runtime -t businessos-api:local .
-docker build -f apps/api/Dockerfile --target operations -t businessos-operations:local .
-docker build -f apps/web/Dockerfile \
-  --build-arg NEXT_PUBLIC_API_URL=/api \
-  --build-arg API_INTERNAL_ORIGIN=http://api:4000 \
-  -t businessos-web:local .
-```
-
-The API runtime contains deployed production dependencies and a generated Prisma client. Use the separate operations target for migrations/seeding in a private environment, not the public runtime. The web uses Next.js standalone output only when `NEXT_STANDALONE=true`, as configured in its Dockerfile. Native builds continue to use `next start`.
-
-API runtime variables are documented in [api.env.example](../deploy/api.env.example); web variables are in [web.env.example](../deploy/web.env.example). Keep the API/database on an internal network; terminate HTTPS at a trusted proxy or managed provider. Do not publish PostgreSQL ports. Health checks are built into both images.
-
-Docker is unavailable on the local macOS machine. Local API runtime packaging/imports were checked. The [Linux Actions run](https://github.com/cristoferdiazalvarez/businessos-erp/actions/runs/43404172988) successfully built the API runtime, API operations and standalone web images. This verifies image construction; hosted startup, TLS and a deployed container smoke test remain separate checks.
-
-## Local checks
-
-```sh
+pnpm db:generate
+pnpm e2e:prepare
 pnpm lint
 pnpm typecheck
 pnpm test
-pnpm build
-pnpm e2e:prepare
+NEXT_PUBLIC_API_URL=/api NEXT_PUBLIC_DEMO_MODE=true API_INTERNAL_ORIGIN=http://localhost:4000 pnpm build
+pnpm check:api-bundle
 E2E_PRODUCTION=1 pnpm test:e2e
 pnpm check:production
+pnpm check:demo-browser
 pnpm check:publication
 ```
 
-`check:production` boots a temporary production API against the isolated `_test` database and checks database readiness, Secure-cookie attributes, employee reads, read-only demo enforcement, origin rejection and token revocation. It does not provision TLS or replace the final hosted-browser checks.
+Set `PLAYWRIGHT_BROWSERS_PATH` consistently if using the project-local browser cache. Stop only your own local web/API processes before browser verification.
+
+Vercel and Neon cold starts, monthly quotas, account restrictions and terms can affect availability. Free services are not an SLA or permanent contractual promise. Neon compute suspends when idle while storage persists; exceeding free compute/transfer limits can suspend access until reset. The Free database is not a substitute for a verified backup/restore policy. No paid upgrade, anti-sleep traffic, trial renewal or automatic billing is authorized.
+
+Provider-native packaging, Neon TLS/pooling and public HTTPS remain unverified until the authorized resources exist. Local tests and Linux CI exercise real PostgreSQL and the application; they do not impersonate the Vercel/Neon control plane.

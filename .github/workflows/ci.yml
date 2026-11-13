@@ -37,6 +37,7 @@ jobs:
       NODE_ENV: test
       WEB_ORIGIN: http://localhost:3000
       NEXT_PUBLIC_API_URL: /api
+      NEXT_PUBLIC_DEMO_MODE: "true"
       API_INTERNAL_ORIGIN: http://localhost:4000
       COOKIE_SECURE: "false"
       PUBLIC_DEMO_MODE: "false"
@@ -72,9 +73,11 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm build
+      - run: pnpm check:api-bundle
       - run: pnpm --filter @businessos/web exec playwright install --with-deps chromium
       - run: pnpm test:e2e
       - run: pnpm check:production
+      - run: pnpm check:demo-browser
 
   containers:
     needs: verify

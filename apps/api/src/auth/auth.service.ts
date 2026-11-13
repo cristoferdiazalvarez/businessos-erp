@@ -2,7 +2,12 @@ import {
   Injectable,
   UnauthorizedException,
   UnprocessableEntityException,
+  ForbiddenException,
+  HttpException,
+  HttpStatus,
+  ServiceUnavailableException,
 } from "@nestjs/common";
+import type { Role } from "@prisma/client";
 import { randomBytes, createHash } from "node:crypto";
 import * as argon2 from "argon2";
 import { PrismaService } from "../prisma/prisma.service";
@@ -19,6 +24,7 @@ export class AuthService {
   constructor(private readonly prisma: PrismaService) {}
 
   async login(email: string, password: string): Promise<{ token: string; user: AuthPrincipal }> {
+    await this.limitPublicDemoAuth();
     const user = await this.prisma.user.findUnique({
       where: { email: email.toLowerCase() },
       include: {
@@ -37,13 +43,55 @@ export class AuthService {
       throw new UnauthorizedException("Invalid email or password");
     }
 
+    return this.issueSession(user, membership);
+  }
+
+  async createDemoSession(): Promise<{ token: string; user: AuthPrincipal }> {
+    if (process.env.PUBLIC_DEMO_MODE !== "true") throw new ForbiddenException("Public demo access is disabled");
+    await this.limitPublicDemoAuth();
+    const membership = await this.prisma.membership.findFirst({
+      where: {
+        role: "EMPLOYEE",
+        organization: { slug: "northstar-studio" },
+        user: { email: (process.env.DEMO_EMPLOYEE_EMAIL ?? "employee@businessos.demo").toLowerCase() },
+      },
+      include: { user: true, organization: true },
+    });
+    if (!membership) throw new ServiceUnavailableException("Demo access is not ready");
+    return this.issueSession(membership.user, membership, 60 * 60 * 1000);
+  }
+
+  private async limitPublicDemoAuth(): Promise<void> {
+    if (process.env.PUBLIC_DEMO_MODE !== "true") return;
+    // Atomic PostgreSQL upsert remains authoritative across serverless instances.
+    const [window] = await this.prisma.$queryRaw<Array<{ count: number }>>`
+      INSERT INTO "DemoAuthWindow" ("id", "count", "expiresAt")
+      VALUES ('public-demo-auth', 1, NOW() + INTERVAL '1 minute')
+      ON CONFLICT ("id") DO UPDATE SET
+        "count" = CASE WHEN "DemoAuthWindow"."expiresAt" <= NOW() THEN 1
+          ELSE LEAST("DemoAuthWindow"."count" + 1, 31) END,
+        "expiresAt" = CASE WHEN "DemoAuthWindow"."expiresAt" <= NOW()
+          THEN NOW() + INTERVAL '1 minute' ELSE "DemoAuthWindow"."expiresAt" END
+      RETURNING "count"
+    `;
+    if (!window || window.count > 30) {
+      throw new HttpException("Demo sign-in is busy. Please try again in one minute.", HttpStatus.TOO_MANY_REQUESTS);
+    }
+    await this.prisma.session.deleteMany({ where: { expiresAt: { lt: new Date() } } });
+  }
+
+  private async issueSession(
+    user: { id: string; email: string; name: string; theme?: string },
+    membership: { organizationId: string; role: Role; organization: { name: string } },
+    ttl = SESSION_TTL_MS,
+  ): Promise<{ token: string; user: AuthPrincipal }> {
     const token = randomBytes(32).toString("base64url");
     await this.prisma.session.create({
       data: {
         tokenHash: hashToken(token),
         userId: user.id,
         organizationId: membership.organizationId,
-        expiresAt: new Date(Date.now() + SESSION_TTL_MS),
+        expiresAt: new Date(Date.now() + ttl),
       },
     });
 

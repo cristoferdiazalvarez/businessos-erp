@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
 datasource db {
@@ -96,6 +97,13 @@ model PasswordResetToken {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, expiresAt])
+}
+
+// One shared counter; no visitor IPs or other personal data are retained.
+model DemoAuthWindow {
+  id        String   @id
+  count     Int      @default(0)
+  expiresAt DateTime
 }
 
 model Customer {

@@ -19,7 +19,10 @@
     "e2e:prepare": "node scripts/e2e.mjs prepare",
     "env:local": "node scripts/local-env.mjs",
     "check:publication": "node scripts/check-publication.mjs",
-    "check:production": "node scripts/verify-production.mjs"
+    "check:production": "node scripts/verify-production.mjs",
+    "check:demo-browser": "node scripts/verify-demo-browser.mjs",
+    "demo:prepare:free": "node scripts/prepare-free-demo.mjs",
+    "check:api-bundle": "node scripts/check-api-bundle.mjs"
   },
   "devDependencies": {
     "prettier": "^3.6.2"

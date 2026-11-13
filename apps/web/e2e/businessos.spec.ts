@@ -13,6 +13,10 @@ test("critical workspace, role, order, invoice, export and tenant-isolation flow
   expect(adminPassword, "Set DEMO_ADMIN_PASSWORD and run the reproducible seed first").toBeTruthy();
   expect(employeePassword, "Set DEMO_EMPLOYEE_PASSWORD and run the reproducible seed first").toBeTruthy();
   expect(isolatedPassword, "Set E2E_OTHER_PASSWORD and run the isolation seed first").toBeTruthy();
+  const disabledDemo = await page.request.post("http://localhost:4000/api/auth/demo", {
+    headers: { Origin: "http://localhost:3000" },
+  });
+  expect(disabledDemo.status()).toBe(403);
 
   const suffix = Date.now().toString(36);
   const customerName = `E2E Customer ${suffix}`;
