@@ -1,0 +1,232 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+  EMPLOYEE
+}
+
+enum OrderStatus {
+  DRAFT
+  CONFIRMED
+  PAID
+  CANCELLED
+}
+
+enum InvoiceStatus {
+  DRAFT
+  ISSUED
+  PAID
+  VOID
+}
+
+model Organization {
+  id          String                 @id @default(cuid())
+  name        String
+  slug        String                 @unique
+  currency    String                 @default("USD")
+  taxRate     Decimal                @default(0) @db.Decimal(5, 4)
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+  memberships Membership[]
+  customers   Customer[]
+  categories  Category[]
+  products    Product[]
+  movements   InventoryMovement[]
+  orders      Order[]
+  invoices    Invoice[]
+  auditLogs   AuditLog[]
+}
+
+model User {
+  id              String                 @id @default(cuid())
+  email           String                 @unique
+  passwordHash    String
+  name            String
+  theme           String                 @default("light")
+  createdAt       DateTime               @default(now())
+  updatedAt       DateTime               @updatedAt
+  memberships     Membership[]
+  sessions        Session[]
+  passwordResets  PasswordResetToken[]
+  auditEvents     AuditLog[]             @relation("AuditActor")
+}
+
+model Membership {
+  id             String       @id @default(cuid())
+  userId         String
+  organizationId String
+  role           Role         @default(EMPLOYEE)
+  invitedAt      DateTime?
+  joinedAt       DateTime     @default(now())
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizationId])
+  @@index([organizationId, role])
+}
+
+model Session {
+  id             String       @id @default(cuid())
+  tokenHash      String       @unique
+  userId         String
+  organizationId String
+  expiresAt      DateTime
+  createdAt      DateTime     @default(now())
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+  @@index([organizationId])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+}
+
+model Customer {
+  id             String       @id @default(cuid())
+  organizationId String
+  name           String
+  email          String?
+  company        String?
+  phone          String?
+  tags           String[]     @default([])
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  orders         Order[]
+
+  @@unique([organizationId, email])
+  @@index([organizationId, name])
+}
+
+model Category {
+  id             String       @id @default(cuid())
+  organizationId String
+  name           String
+  createdAt      DateTime     @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  products       Product[]
+
+  @@unique([organizationId, name])
+}
+
+model Product {
+  id             String              @id @default(cuid())
+  organizationId String
+  categoryId     String?
+  sku            String
+  name           String
+  description    String?
+  price          Decimal             @db.Decimal(12, 2)
+  stock          Int                 @default(0)
+  lowStockAt     Int                 @default(5)
+  active         Boolean             @default(true)
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  organization   Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  category       Category?           @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  orderItems     OrderItem[]
+  movements      InventoryMovement[]
+
+  @@unique([organizationId, sku])
+  @@index([organizationId, active, name])
+  @@index([organizationId, stock])
+}
+
+model InventoryMovement {
+  id             String       @id @default(cuid())
+  organizationId String
+  productId      String
+  quantity       Int
+  reason         String
+  sourceKey      String?      @unique
+  createdAt      DateTime     @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  product        Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, productId, createdAt])
+}
+
+model Order {
+  id             String       @id @default(cuid())
+  organizationId String
+  customerId     String
+  orderNumber    String
+  status         OrderStatus  @default(DRAFT)
+  subtotal       Decimal      @db.Decimal(12, 2)
+  discount       Decimal      @default(0) @db.Decimal(12, 2)
+  taxRate        Decimal      @default(0) @db.Decimal(5, 4)
+  taxAmount      Decimal      @db.Decimal(12, 2)
+  total          Decimal      @db.Decimal(12, 2)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  customer       Customer     @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  items          OrderItem[]
+  invoice        Invoice?
+
+  @@unique([organizationId, orderNumber])
+  @@index([organizationId, createdAt, status])
+  @@index([organizationId, customerId])
+}
+
+model OrderItem {
+  id        String   @id @default(cuid())
+  orderId   String
+  productId String
+  quantity  Int
+  unitPrice Decimal  @db.Decimal(12, 2)
+  lineTotal Decimal  @db.Decimal(12, 2)
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@index([orderId])
+}
+
+model Invoice {
+  id             String        @id @default(cuid())
+  organizationId String
+  orderId        String        @unique
+  number         String
+  status         InvoiceStatus @default(DRAFT)
+  issuedAt       DateTime?
+  dueAt          DateTime?
+  createdAt      DateTime      @default(now())
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  order          Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, number])
+  @@index([organizationId, status, createdAt])
+}
+
+model AuditLog {
+  id             String       @id @default(cuid())
+  organizationId String
+  actorId        String?
+  action         String
+  entity         String
+  entityId       String?
+  metadata       Json?
+  createdAt      DateTime     @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  actor          User?        @relation("AuditActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, createdAt])
+  @@index([organizationId, entity, entityId])
+}

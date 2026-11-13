@@ -1,0 +1,26 @@
+node_modules
+.next
+dist
+coverage
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+playwright-report
+test-results
+.local/
+*.tsbuildinfo
+*.dmg
+
+# Local agent, cloud and editor state
+.aws/
+.codex/
+.agents/
+.idea/
+*.pem
+*.key
+backups/
+*.dump
+
+.pnpm-store/

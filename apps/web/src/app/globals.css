@@ -1,0 +1,84 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: light;
+  --background: #f7f8f6;
+  --foreground: #19241f;
+  --card: #ffffff;
+  --card-foreground: #19241f;
+  --primary: #176b53;
+  --primary-foreground: #ffffff;
+  --secondary: #e8f1ec;
+  --secondary-foreground: #245c49;
+  --muted: #eff2ef;
+  --muted-foreground: #738078;
+  --border: #e5eae6;
+  --ring: #378568;
+  --destructive: #bf4545;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+  font-feature-settings: "ss01" on;
+}
+
+button, input, select { font: inherit; }
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  --color-destructive: var(--destructive);
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --background: #111a16;
+  --foreground: #edf4ef;
+  --card: #18231e;
+  --card-foreground: #edf4ef;
+  --primary: #55b38d;
+  --primary-foreground: #10251c;
+  --secondary: #22342b;
+  --secondary-foreground: #cce8d9;
+  --muted: #202c26;
+  --muted-foreground: #9caaa1;
+  --border: #2b3a31;
+  --ring: #6ac69d;
+  --destructive: #e16e6e;
+}
+
+.page-shell {
+  background-image: radial-gradient(ellipse at 68% 0%, rgba(205, 231, 214, .42), transparent 38%);
+}
+
+.soft-grid {
+  background-image: linear-gradient(rgba(38, 89, 67, .045) 1px, transparent 1px), linear-gradient(90deg, rgba(38, 89, 67, .045) 1px, transparent 1px);
+  background-size: 34px 34px;
+}
+
+@layer components {
+  .form-input {
+    @apply mt-2 h-10 w-full rounded-xl border border-border bg-background px-3 text-sm font-normal text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/20 disabled:opacity-50;
+  }
+}
+
+::selection { background: #c6e7d6; color: #173d2d; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}

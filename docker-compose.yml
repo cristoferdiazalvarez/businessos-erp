@@ -1,0 +1,36 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: businessos
+      POSTGRES_USER: businessos
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in your .env file}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - businessos-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U businessos -d businessos"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  postgres-test:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: businessos_test
+      POSTGRES_USER: businessos_test
+      POSTGRES_PASSWORD: ${TEST_POSTGRES_PASSWORD:?Set TEST_POSTGRES_PASSWORD in your .env file}
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - businessos-postgres-test:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U businessos_test -d businessos_test"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  businessos-postgres:
+  businessos-postgres-test:

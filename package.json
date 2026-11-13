@@ -1,0 +1,33 @@
+{
+  "name": "businessos",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@10.12.1",
+  "engines": {
+    "node": ">=20.9"
+  },
+  "scripts": {
+    "dev": "pnpm --parallel --filter @businessos/api --filter @businessos/web dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "db:generate": "pnpm --filter @businessos/api db:generate",
+    "db:migrate": "pnpm --filter @businessos/api db:migrate",
+    "db:seed": "pnpm --filter @businessos/api db:seed",
+    "test:e2e": "node scripts/e2e.mjs test",
+    "e2e:prepare": "node scripts/e2e.mjs prepare",
+    "env:local": "node scripts/local-env.mjs",
+    "check:publication": "node scripts/check-publication.mjs",
+    "check:production": "node scripts/verify-production.mjs"
+  },
+  "devDependencies": {
+    "prettier": "^3.6.2"
+  },
+  "pnpm": {
+    "overrides": {
+      "postcss": "8.5.32",
+      "deepmerge-ts": "8.0.2"
+    }
+  }
+}

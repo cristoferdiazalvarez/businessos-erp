@@ -1,0 +1,90 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: businessos
+          POSTGRES_USER: businessos
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U businessos -d businessos"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://businessos@localhost:5432/businessos?schema=public
+      TEST_DATABASE_URL: postgresql://businessos@localhost:5432/businessos_test?schema=public
+      NODE_ENV: test
+      WEB_ORIGIN: http://localhost:3000
+      NEXT_PUBLIC_API_URL: /api
+      API_INTERNAL_ORIGIN: http://localhost:4000
+      COOKIE_SECURE: "false"
+      PUBLIC_DEMO_MODE: "false"
+      E2E_PRODUCTION: "1"
+      DEMO_ADMIN_EMAIL: admin@businessos.demo
+      DEMO_MANAGER_EMAIL: manager@businessos.demo
+      DEMO_EMPLOYEE_EMAIL: employee@businessos.demo
+      E2E_OTHER_EMAIL: isolation@businessos.demo
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.12.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm check:publication
+      - run: pnpm db:generate
+      - run: pnpm db:migrate
+      - name: Generate ephemeral demo passwords
+        run: |
+          for key in DEMO_ADMIN_PASSWORD DEMO_MANAGER_PASSWORD DEMO_EMPLOYEE_PASSWORD E2E_OTHER_PASSWORD; do
+            value="$(node -e 'process.stdout.write(require("node:crypto").randomBytes(24).toString("base64url"))')"
+            printf '::add-mask::%s\n' "$value"
+            printf '%s=%s\n' "$key" "$value" >> "$GITHUB_ENV"
+          done
+      - run: pnpm db:seed
+      - run: psql postgresql://businessos@localhost:5432/businessos -c 'CREATE DATABASE businessos_test'
+      - run: pnpm e2e:prepare
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
+      - run: pnpm --filter @businessos/web exec playwright install --with-deps chromium
+      - run: pnpm test:e2e
+      - run: pnpm check:production
+
+  containers:
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build API runtime and operations images
+        run: |
+          docker build -f apps/api/Dockerfile --target runtime -t businessos-api:ci .
+          docker build -f apps/api/Dockerfile --target operations -t businessos-operations:ci .
+      - name: Build standalone web image
+        run: docker build -f apps/web/Dockerfile -t businessos-web:ci .
