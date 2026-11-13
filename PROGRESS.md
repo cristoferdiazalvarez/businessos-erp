@@ -1,5 +1,11 @@
 # BusinessOS Progress
 
+## Current delivery status — 2026-11-13
+
+**Live demo:** https://businessos-web-five.vercel.app — choose **Explore demo**. Both production builds and public desktop/mobile Chromium acceptance passed with real Neon PostgreSQL, trusted HTTPS and secure employee sessions. Accounts remain Vercel Hobby / Neon Free; no paid service or card was activated. No deployment intervention remains pending. Earlier blocked/preparation notes below are historical.
+
+Application/deployment commit `a85b2a7a273f8d9261c9b253870c3bbf6a46bf99` is published on `main`. [Final Linux CI](https://github.com/cristoferdiazalvarez/businessos-erp/actions/runs/43415107476) completed with **SUCCESS** for both `verify` and `containers`, including all three Docker targets. The final local lint, typecheck and 27 unit tests also passed. Publication scanning checked 160 working/index candidates against local and new provider/database credentials without exposing values; no matching secrets were found. This final documentation-only synchronization uses `[skip ci]`; application/workflow content remains the validated content.
+
 ## Initial local validation — 2026-11-13
 
 The initial local PostgreSQL-backed validation passed without changing the architecture. The sections below preserve that evidence. The GitHub delivery continuation at the end records the subsequent publication work and current remote status.
